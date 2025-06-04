@@ -20,20 +20,19 @@ const corsOptions = {
 
 // routes
 
-
 // POST /api/games
 // Crea una nuova partita
 
 // GET /api/games/:gameId/randomCards
 // Ottieni carte casuali per il gioco
 
-// PUT /api/games/:gameId
+// PATCH /api/games/:gameId
 // Aggiorna il risultato della partita
 
 // POST /api/rounds
 // Aggiungi nuovo round (eventualmente roundNumber autoincrementato dal server)
 
-// PUT /api/rounds/:roundId
+// PATCH /api/rounds/:roundId
 // Manda result del round
 
 // GET /api/users/:userId/games
