@@ -81,6 +81,26 @@ const listUserGames = (userId) => {
     });
 }
 
+const addCard = (card) => {
+    return new Promise((resolve, reject) => {
+        const sql = "INSERT INTO Card(name, imagePath, misfortune) VALUES(?, ?, ?)";
+        db.run(sql, [card.name, card.imagePath, card.misfortune], function (err) {
+            if (err) reject(err);
+            else resolve({ message: "Card added successfully.", id: this.lastID });
+        });
+    });
+}
+
+const addUser = (user) => {
+    return new Promise((resolve, reject) => {
+        const sql = "INSERT INTO User(username, email) VALUES(?, ?)";
+        db.run(sql, [user.username, user.email], function (err) {
+            if (err) reject(err);
+            else resolve({ message: "User added successfully.", id: this.lastID });
+        });
+    });
+}
+
 export {
     addGame,
     listRandomCardsForGame,
@@ -88,5 +108,7 @@ export {
     addRound,
     getLatestRoundForGame,
     updateRoundResult,
-    listUserGames
+    listUserGames,
+    addCard,
+    addUser
 };

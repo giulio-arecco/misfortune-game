@@ -24,8 +24,9 @@ function Round(gameId, cardId, number, startTime, endTime = null, result = null,
     this.result = result;
 }
 
-function User(username, id = null) {
+function User(username, email, id = null) {
     this.id = id;
+    this.email = email;
     this.username = username;
 }
 

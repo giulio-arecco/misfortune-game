@@ -12,6 +12,7 @@ const port = 3001;
 // middleware
 app.use(express.json());
 app.use(morgan('dev'));
+app.use('/images', express.static('public/images'));
 
 const stringOrNullValidator = (value, { path }) => {
     if (value === null) return true;
