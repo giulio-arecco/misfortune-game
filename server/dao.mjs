@@ -5,6 +5,11 @@ const db = new sqlite.Database('./database.db', (err) => {
     if (err) throw err;
 });
 
+// Enable foreign key constraints
+db.run('PRAGMA foreign_keys = ON;', (err) => {
+  if (err) console.error('Could not enable foreign keys:', err);
+});
+
 const addGame = (game) => {
     return new Promise((resolve, reject) => {
         const sql = "INSERT INTO Game(userId, date) VALUES(?, ?)";
@@ -37,10 +42,21 @@ const updateGameResult = (gameId, result) => {
 
 const addRound = (round) => {
     return new Promise((resolve, reject) => {
-        const sql = "INSERT INTO Round(gameId, cardId, number, startTime, endTime, result) VALUES(?, ?, ?, ?, ?, ?)";
-        db.run(sql, [round.gameId, round.cardId, round.number, round.startTime, round.endTime, round.result], function (err) {
+        const sql = "INSERT INTO Round(gameId, cardId, number, startTime) VALUES(?, ?, ?, ?)";
+        db.run(sql, [round.gameId, round.cardId, round.number, round.startTime], function (err) {
             if (err) reject(err);
             else resolve({ message: "Round added successfully.", id: this.lastID });
+        });
+    });
+}
+
+const getLatestRoundForGame = (gameId) => {
+    return new Promise((resolve, reject) => {
+        const sql = "SELECT * FROM Round WHERE gameId = ? ORDER BY number DESC LIMIT 1";
+        db.get(sql, [gameId], (err, row) => {
+            if (err) reject(err);
+            else if (row) resolve(new Round(row.gameId, row.cardId, row.number, row.startTime, row.endTime, row.result, row.id));
+            else resolve(null);
         });
     });
 }
@@ -70,6 +86,7 @@ export {
     listRandomCardsForGame,
     updateGameResult,
     addRound,
+    getLatestRoundForGame,
     updateRoundResult,
     listUserGames
 };
