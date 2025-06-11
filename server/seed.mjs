@@ -60,9 +60,10 @@ main();
 
 async function main() {
     await clearTables();
-    // for (const card of cards) {
-    //     await addCard(card);
-    // }
+    for (const card of cards) {
+        await addCard(card);
+    }
+    await addUser(new User("Test User", "testuser@mail.com"));
     db.close();
 }
 

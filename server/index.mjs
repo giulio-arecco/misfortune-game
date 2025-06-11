@@ -136,7 +136,7 @@ app.post('/api/rounds', [
 // PATCH /api/rounds/:roundId
 app.patch('/api/rounds/:roundId', [
     param('roundId').exists().withMessage('Param "roundId" must exist').bail()
-    .isInt({ min: 1 }).withMessage('Param "roundId" must exist and it must be a positive integer'),
+    .isInt({ min: 1 }).withMessage('Param "roundId" must be a positive integer'),
     body('result').exists().withMessage('Field "result" must exist').bail()
     .isString().withMessage('Field "result" must be a string').bail()
     .notEmpty().withMessage('Field "result" must be a non-empty string')
