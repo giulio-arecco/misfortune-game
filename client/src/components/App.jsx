@@ -1,18 +1,19 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Container } from 'react-bootstrap'
-import NavHeader from './Navbar'
-import Footer from './Footer'
+import { Route, Routes } from 'react-router'
+import HomePage from './HomePage'
+import DefaultLayout from './DefaultLayout'
+import PageNotFound from './PageNotFound'
+import GamePage from './GamePage'
 
 function App() {
   return (
-    <>
-      <NavHeader />
-      
-      <Container fluid className="d-flex flex-column min-vh-100">
-      </Container>
-
-      <Footer />
-    </>
+    <Routes>
+        <Route element={<DefaultLayout/>}>
+          <Route path='/' element={<HomePage/>} />
+          <Route path='/game' element={<GamePage/>} />
+          <Route path='*' element={<PageNotFound/>} />
+        </Route>
+    </Routes>
   )
 }
 

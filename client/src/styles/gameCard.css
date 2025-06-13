@@ -1,0 +1,66 @@
+.game-card-img {
+  height: 12vw;
+  max-height: 160px;
+  object-fit: cover;
+}
+
+@media (min-width: 1200px) {
+  .game-card-col {
+    flex: 0 0 calc(16.666% - 1rem);
+    max-width: calc(16.666% - 1rem);
+  }
+}.game-card-img {
+  height: 12vw;
+  max-height: 160px;
+  object-fit: cover;
+}
+
+.game-card-container {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.game-card-item {
+  width: 200px;
+  min-width: 180px;
+  max-width: 220px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .game-card-item {
+    width: calc(50% - 0.5rem);
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-card-item {
+    width: 100%;
+    max-width: 250px;
+  }
+}
+
+.card-title-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  line-height: 1.2em;
+  max-height: 3.6em;
+}
+
+.card-title-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  line-height: 1.2em;
+  max-height: 3.6em;
+}
