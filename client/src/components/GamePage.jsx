@@ -7,9 +7,14 @@ function GamePage() {
 
     const playerCards = [
         new Card("Ti si rompe la penna proprio durante l’esame.", '/images/cards/broken-pen.jpg', 1.0, 1),
-        new Card("Il caffè della macchinetta è freddo e amaro.", '/images/cards/bad-coffee.png', 2.0, 2),
         new Card("Un compagno di corso copia tutto e prende 30 e lode.", '/images/cards/copied-and-passed.png', 2.5, 3),
+        new Card("Il caffè della macchinetta è freddo e amaro.", '/images/cards/bad-coffee.png', 2.0, 2),
+        // new Card("Ti dimentichi di portare la tessera universitaria e non puoi entrare in biblioteca.", '/images/cards/cannot-enter-library.png', 3.0),
+        // new Card("Ti si apre la zip dello zaino e perdi appunti importanti.", '/images/cards/losing-notes.png', 5.0),
+        // new Card("Ti dimentichi il portafoglio e non puoi comprare nulla al bar.", '/images/cards/forgot-wallet.png', 7.0),
     ];
+
+    playerCards.sort((a, b) => a.misfortune - b.misfortune);
 
     const currentRound = 1;
     const errors = 2;

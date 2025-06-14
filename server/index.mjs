@@ -2,8 +2,10 @@
 import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
+import dayjs from 'dayjs';
 import { query, param, body, validationResult } from 'express-validator';
-import { addGame, addRound, getLatestRoundForGame, listRandomCardsForGame, updateGameResult, updateRoundResult, listUserGames } from './dao.mjs';
+import { addGame, addRound, getLatestRoundForGame, listRandomCardsForGame, updateGameResult, updateRoundResult, listUserGamesWithRoundsAndCards } from './dao.mjs';
+import { Round } from './models.mjs';
 
 // init express
 const app = express();
@@ -14,11 +16,11 @@ app.use(express.json());
 app.use(morgan('dev'));
 app.use('/images', express.static('public/images'));
 
-const stringOrNullValidator = (value, { path }) => {
+const intOrNullValidator = (value, { path }) => {
     if (value === null) return true;
-    // Non-empty string
-    if (typeof value === 'string' && value.trim().length > 0) return true;
-    throw new Error(`Field "${path}" must be either null or a non-empty string`);
+    const n = Number(value);
+    if (!isNaN(n) && Number.isInteger(n) && n > 0) return true;
+    throw new Error(`Field "${path}" must be either null or a positive integer`);
 };
 
 // cors setup
@@ -32,7 +34,7 @@ app.use(cors(corsOptions));
 // routes
 // POST /api/games
 app.post('/api/games', [
-    body('userId').optional({ nullable: true }).custom(stringOrNullValidator),
+    body('userId').optional({ nullable: true }).custom(intOrNullValidator),
     body('date').exists().bail().withMessage('Field "date" must exist')
     .isString().withMessage('Field "date" must be a string').bail()
     .notEmpty().withMessage('Field "date" must be a non-empty string'),
@@ -106,16 +108,15 @@ app.patch('/api/games/:gameId', [
 app.post('/api/rounds', [
   body('gameId').exists().withMessage('Field "gameId" must exist').bail()
   .isInt({ min: 1 }).withMessage('Field "gameId" must be a positive integer'),
-  body('cardId').exists().withMessage('Field "cardId" must exist').bail()
-  .isInt({ min: 1 }).withMessage('Field "cardId" must be a positive integer'),
-  body('startTime').exists().withMessage('Field "startTime" must exist').bail()
-  .isString().withMessage('Field "startTime" must be a string').bail()
-  .notEmpty().withMessage('Field "startTime" must be a non-empty string'),
+  body('cards').exists().withMessage('Field "cards" must exist').bail()
+  .isArray({ min: 1 }).withMessage('Field "cards" must be a non-empty array of Card objects'),
+  body('cards.*.id').exists().withMessage('Each card must have an id').bail()
+  .isInt({ min: 1 }).withMessage('Each card id must be a positive integer')
 ], async (req, res) => {
   const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+  if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+  }
 
   try {
     const latestRound = await getLatestRoundForGame(req.body.gameId);
@@ -125,7 +126,9 @@ app.post('/api/rounds', [
       newRoundNum = latestRound.number + 1;
     }
 
-    const response = await addRound({...req.body, number: newRoundNum});
+    const now = dayjs().format('YYYY-MM-DD HH:mm:ss');
+    
+    const response = await addRound(new Round(req.body.gameId, newRoundNum, now, null, null, null, req.body.cards));
     res.status(201).json(response);
   }
   catch (err) {
@@ -166,7 +169,7 @@ app.get('/api/users/:userId/games', [
     }
     
     try {
-      const response = await listUserGames(req.params.userId);
+      const response = await listUserGamesWithRoundsAndCards(req.params.userId);
       if (response.length === 0) {
           return res.status(404).json({ error: "No games found for this user." });
       }
