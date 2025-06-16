@@ -7,7 +7,7 @@ function Card(name, imagePath, misfortune, id = null) {
     this.misfortune = misfortune;
 }
 
-function Game(userId, date, result = null, id = null, cards = []) {
+function Game(userId, date, cards = [], result = null, id = null) {
     this.id = id;
     this.userId = userId;
     this.date = dayjs(date).format('YYYY-MM-DD');
@@ -15,11 +15,11 @@ function Game(userId, date, result = null, id = null, cards = []) {
     this.cards = cards;
 }
 
-function Round(gameId, number, startTime = null, endTime = null, result = null, id = null, cards = []) {
+function Round(gameId, cards = [], number = null, startTime = null, endTime = null, id = null, result = null) {
     this.id = id;
     this.gameId = gameId;
     this.number = number;
-    this.startTime = dayjs(startTime).format('YYYY-MM-DD HH:mm:ss');
+    this.startTime = startTime? dayjs(startTime).format('YYYY-MM-DD HH:mm:ss'): null;
     this.endTime = endTime? dayjs(endTime).format('YYYY-MM-DD HH:mm:ss') : null;
     this.result = result;
     this.cards = cards;

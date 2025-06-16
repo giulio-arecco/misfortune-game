@@ -49,7 +49,8 @@ app.post('/api/games', [
       res.status(201).json(response);
     }
     catch (err) {
-      res.status(500).json({ error: "Internal server error" });
+      if (err.status === 404) res.status(404).json({ error: err.message });
+      else res.status(500).json({ error: "Internal server error" });
     }
 });
 
@@ -100,7 +101,8 @@ app.patch('/api/games/:gameId', [
       res.status(200).json(response);
     }
     catch (err) {
-      res.status(500).json({ error: "Internal server error" });
+      if (err.status === 404) res.status(404).json({ error: err.message });
+      else res.status(500).json({ error: "Internal server error" });
     }
 });
 
@@ -127,12 +129,12 @@ app.post('/api/rounds', [
     }
 
     const now = dayjs().format('YYYY-MM-DD HH:mm:ss');
-    
-    const response = await addRound(new Round(req.body.gameId, newRoundNum, now, null, null, null, req.body.cards));
+    const response = await addRound(new Round(req.body.gameId, req.body.cards, newRoundNum, now));
     res.status(201).json(response);
   }
   catch (err) {
-      res.status(500).json({ error: "Internal server error" });
+      if (err.status === 404) res.status(404).json({ error: err.message });
+      else res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -154,7 +156,8 @@ app.patch('/api/rounds/:roundId', [
       res.status(200).json(response);
     }
     catch (err) {
-      res.status(500).json({ error: "Internal server error" });
+      if (err.status === 404) res.status(404).json({ error: err.message });
+      else res.status(500).json({ error: "Internal server error" });
     }
 });
 

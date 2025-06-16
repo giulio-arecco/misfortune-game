@@ -15,7 +15,14 @@ const addGame = (game) => {
         const sql = "INSERT INTO Game(userId, date) VALUES(?, ?)";
         db.run(sql, [game.userId, game.date], function (err) {
             if (err) reject(err);
-            else resolve({ message: "Game added successfully.", id: this.lastID });
+            else {
+                const selectSql = "SELECT * FROM Game WHERE id = ?";
+                db.get(selectSql, [game.id], (err, row) => {
+                    if (err) reject(err);
+                    else if (!row) reject({ status: 404, message: "Game not found." });
+                    else resolve(new Game(row.userId, row.date, [], row.result, row.id));
+                });
+            }
         });
     });
 }
@@ -42,19 +49,22 @@ const listRandomCardsForGame = (gameId, n) => {
 
 const updateGameResult = (gameId, result) => {
     return new Promise((resolve, reject) => {
-        const sql = "UPDATE Game SET result = ? WHERE id = ?";
-        db.run(sql, [result, gameId], function (err) {
+        const updateSql = "UPDATE Game SET result = ? WHERE id = ?";
+        db.run(updateSql, [result, gameId], function (err) {
             if (err) reject(err);
-            else resolve({ message: "Game updated successfully." });
+            else {
+                const selectSql = "SELECT * FROM Game WHERE id = ?";
+                db.get(selectSql, [gameId], (err, row) => {
+                    if (err) reject(err);
+                    else if (!row) reject({ status: 404, message: "Game not found." });
+                    else resolve(new Game(row.userId, row.date, [], row.result, row.id));
+                });
+            }
         });
     });
-}
+};
 
 const addRound = async (round) => {
-    if (!round.cards || !Array.isArray(round.cards) || round.cards.length === 0) {
-        throw new Error("At least one card must be associated with a round.");
-    }
-
     const runAsync = (sql, params) => new Promise((resolve, reject) => {
         db.run(sql, params, function (err) {
             if (err) reject(err);
@@ -76,9 +86,38 @@ const addRound = async (round) => {
             );
         }
 
-        return { message: "Round and cards added successfully.", id: roundId };
+        const roundRow = await new Promise((resolve, reject) => {
+            db.get("SELECT * FROM Round WHERE id = ?", [roundId], (err, row) => {
+                if (err) reject(err);
+                else if (!row) reject({ status: 404, message: "Round not found." });
+                else resolve(row);
+            });
+        });
+
+        const roundCards = await new Promise((resolve, reject) => {
+            db.all(
+                `SELECT Card.* FROM Card
+                 JOIN RoundCard ON Card.id = RoundCard.cardId
+                 WHERE RoundCard.roundId = ?`,
+                [roundId],
+                (err, rows) => {
+                    if (err) reject(err);
+                    else if (!rows || rows.length === 0) reject({ status: 404, message: "No cards found for the round." });
+                    else resolve(rows.map(row => new Card(row.name, row.imagePath, row.misfortune, row.id)));
+                }
+            );
+        });
+
+        return new Round(
+            roundRow.gameId,
+            roundCards,
+            roundRow.number,
+            roundRow.startTime,
+            roundRow.endTime,
+            roundRow.id,
+            roundRow.result
+        );
     } catch (err) {
-        // Manual rollback
         if (roundId) {
             await runAsync("DELETE FROM Round WHERE id = ?", [roundId]).catch(() => {});
         }
@@ -91,7 +130,7 @@ const getLatestRoundForGame = (gameId) => {
         const sql = "SELECT * FROM Round WHERE gameId = ? ORDER BY number DESC LIMIT 1";
         db.get(sql, [gameId], (err, row) => {
             if (err) reject(err);
-            else if (row) resolve(new Round(row.gameId, row.number, row.startTime, row.endTime, row.result, row.id));
+            else if (row) resolve(new Round(row.gameId, [], row.number, row.startTime, row.endTime, row.id, row.result));
             else resolve(null);
         });
     });
@@ -99,10 +138,17 @@ const getLatestRoundForGame = (gameId) => {
 
 const updateRoundResult = (roundId, result) => {
     return new Promise((resolve, reject) => {
-        const sql = "UPDATE Round SET result = ? WHERE id = ?";
-        db.run(sql, [result, roundId], function (err) {
+        const updateSql = "UPDATE Round SET result = ? WHERE id = ?";
+        db.run(updateSql, [result, roundId], function (err) {
             if (err) reject(err);
-            else resolve({ message: "Round updated successfully." });
+            else {
+                const selectSql = "SELECT * FROM Round WHERE id = ?";
+                db.get(selectSql, [roundId], (err, row) => {
+                    if (err) reject(err);
+                    else if (!row) reject({ status: 404, message: "Round not found." });
+                    else resolve(new Round(row.gameId, [], row.number, row.startTime, row.endTime, row.id, row.result));
+                });
+            }
         });
     });
 }
@@ -132,6 +178,7 @@ const listUserGamesWithRoundsAndCards = (userId) => {
                         gamesMap.set(row.gameId, new Game(
                             row.userId,
                             row.date,
+                            [],
                             row.result,
                             row.gameId,
                         ));
@@ -144,11 +191,12 @@ const listUserGamesWithRoundsAndCards = (userId) => {
                     if (!round) {
                         round = new Round(
                             row.gameId,
+                            [],
                             row.number,
                             row.startTime,
                             row.endTime,
-                            row.roundResult,
                             row.roundId,
+                            row.roundResult
                         );
                         game.rounds.push(round);
                     }
