@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 
-function Card(name, imagePath, misfortune, id = null) {
+function Card(name, imagePath, misfortune = null, id = null) {
     this.id = id;
     this.name = name;
     this.imagePath = imagePath;

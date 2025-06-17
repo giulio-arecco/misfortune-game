@@ -59,7 +59,10 @@ app.get('/api/games/:gameId/randomCards', [
     param('gameId').exists().withMessage('Param "gameId" must exist').bail()
     .isInt({ min: 1 }).withMessage('Param "gameId" must be a positive integer'),
     query('n').exists().withMessage('Query parameter "n" must exist').bail()
-    .isInt({ min: 1 }).withMessage('Query parameter "n" must be a positive integer')
+    .isInt({ min: 1 }).withMessage('Query parameter "n" must be a positive integer').bail(),
+    query('getMisfortune').exists().withMessage('Query parameter "getMisfortune" must exist').bail()
+    .isBoolean().withMessage('Query parameter "getMisfortune" must be a boolean value').bail()
+    .toBoolean()
 ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -67,7 +70,7 @@ app.get('/api/games/:gameId/randomCards', [
     }
     
     try {
-      const response = await listRandomCardsForGame(req.params.gameId, parseInt(req.query.n));
+      const response = await listRandomCardsForGame(req.params.gameId, parseInt(req.query.n), req.query.getMisfortune);
       if (response.length === 0) {
           return res.status(404).json({ error: "No cards found." });
       }

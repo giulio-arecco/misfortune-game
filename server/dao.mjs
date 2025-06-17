@@ -27,7 +27,7 @@ const addGame = (game) => {
     });
 }
 
-const listRandomCardsForGame = (gameId, n) => {
+const listRandomCardsForGame = (gameId, n, getMisfortune) => {
     return new Promise((resolve, reject) => {
         const sql = `
             SELECT * FROM Card
@@ -42,7 +42,12 @@ const listRandomCardsForGame = (gameId, n) => {
             `;
         db.all(sql, [gameId, n], (err, rows) => {
             if (err) reject(err);
-            else resolve(rows.map(row => new Card(row.name, row.imagePath, row.misfortune, row.id)));
+            else {
+                if (getMisfortune)
+                    resolve(rows.map(row => new Card(row.name, row.imagePath, row.misfortune, row.id)));
+                else 
+                    resolve(rows.map(row => new Card(row.name, row.imagePath, null, row.id)));
+            }
         });
     });
 }
@@ -107,16 +112,8 @@ const addRound = async (round) => {
                 }
             );
         });
-
-        return new Round(
-            roundRow.gameId,
-            roundCards,
-            roundRow.number,
-            roundRow.startTime,
-            roundRow.endTime,
-            roundRow.id,
-            roundRow.result
-        );
+        
+        return new Round(roundRow.gameId, roundCards, roundRow.number, roundRow.startTime, roundRow.endTime, roundRow.id, roundRow.result);
     } catch (err) {
         if (roundId) {
             await runAsync("DELETE FROM Round WHERE id = ?", [roundId]).catch(() => {});
