@@ -84,7 +84,8 @@ function clearTables() {
             await runQuery("DELETE FROM Game");
             await runQuery("DELETE FROM Card");
             await runQuery("DELETE FROM User");
-            await runQuery("DELETE FROM sqlite_sequence WHERE name IN ('Card', 'Game', 'Round', 'User')");
+            await runQuery("DELETE FROM RoundCard")
+            await runQuery("DELETE FROM sqlite_sequence WHERE name IN ('Card', 'Game', 'Round', 'User', 'RoundCard')");
             await runQuery("COMMIT");
             resolve("Tables cleared successfully.");
         } catch (err) {

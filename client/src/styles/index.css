@@ -1,0 +1,4 @@
+/* Make all radio button borders more visible */
+.form-check-input {
+  border: 2px solid rgba(0, 0, 0, 0.4) !important;
+}

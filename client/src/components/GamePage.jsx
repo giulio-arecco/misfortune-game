@@ -1,6 +1,7 @@
 import { Row, Col, Button, Container, Form } from 'react-bootstrap';
 import { Card, Game, User, Round } from '../models.mjs';
 import { useState, useEffect } from 'react';
+import CardsDisplay from './CardsDisplay.jsx';
 import dayjs from 'dayjs';
 import GameCard from './GameCard';
 
@@ -11,7 +12,7 @@ fakeGame.cards = [
     new Card("Un compagno di corso copia tutto e prende 30 e lode.", '/images/cards/copied-and-passed.png', 2.5, 2),
     new Card("Il caffè della macchinetta è freddo e amaro.", '/images/cards/bad-coffee.png', 2.0, 3),
     new Card("Ti si rompe la penna proprio durante l’esame.", '/images/cards/broken-pen.jpg', 1.0, 4),
-    new Card("Un compagno di corso copia tutto e prende 30 e lode.", '/images/cards/copied-and-passed.png', 2, 5),
+    new Card("Un compagno di corso copia tutto e prende 30 e lode.", '/images/cards/copied-and-passed.png', 2.5, 5),
 ].sort((a, b) => a.misfortune - b.misfortune);
 fakeGame.errors = 0;
 
@@ -21,7 +22,7 @@ roundZero.cards = fakeGame.cards;
 function GamePage() {
     const [game, setGame] = useState(fakeGame);
     const [currentRound, setCurrentRound] = useState(roundZero);
-    const [selectedPosition, setSelectedPosition] = useState(0);
+    const [selectedPosition, setSelectedPosition] = useState(null);
     
     // Round 1 Starts
     useEffect(() => {
@@ -40,15 +41,57 @@ function GamePage() {
         alert(`Carta inserita in posizione ${selectedPosition}`);
     };
 
+    const handleStartGame = () => {
+        alert("Inizio del gioco!");
+    }
+
+    return (
+        currentRound.number === 0 ?
+        <StartGameLayout
+            game={game}
+            handleStartGame={handleStartGame}
+        />
+        :
+        <InGameLayout
+            game={game}
+            currentRound={currentRound}
+            selectedPosition={selectedPosition}
+            handlePositionChange={handlePositionChange}
+            handleSubmit={handleSubmit}
+        />        
+    );
+}
+
+function StartGameLayout(props) {
+    return (
+        <Container fluid className="d-flex flex-column p-3 mt-4">
+              <Container fluid className="text-center mb-4">
+                <h2>Benvenuto al Gioco della Sfortuna!</h2>
+                <p className="lead">
+                  Queste sono le tue carte iniziali, ordinate per livello di sfortuna.
+                  <br />Dovrai inserire le nuove carte al posto giusto per mantenere l'ordine crescente.
+                </p>
+              </Container>
+              
+              <CardsDisplay cards={props.game.cards} />
+              
+              <Container className="text-center mt-5">
+                <Button variant="primary" size="lg" onClick={props.handleStartGame} className="px-5 py-3 fs-3"> Inizia a Giocare </Button>
+              </Container>
+        </Container>
+    );
+}
+
+function InGameLayout(props) {
     return (
         <Container fluid className="d-flex flex-column p-0" style={{ height: 'calc(90vh - 112px)', minHeight: 0, overflow: 'hidden' }}> 
             <Container fluid className="d-flex flex-column justify-content-around align-items-stretch h-100">
-                <RoundCardAndInfo roundCard={currentRound.cards[0]} currRoundNumber={currentRound.number} errors={game.errors}/>
+                <RoundCardAndInfo roundCard={props.currentRound.cards[0]} currRoundNumber={props.currentRound.number} errors={props.game.errors}/>
                 <CardsForm 
-                    cards={game.cards} 
-                    selectedPosition={selectedPosition} 
-                    onPositionChange={handlePositionChange}
-                    onSubmit={handleSubmit}
+                    cards={props.game.cards} 
+                    selectedPosition={props.selectedPosition} 
+                    onPositionChange={props.handlePositionChange}
+                    onSubmit={props.handleSubmit}
                 />
             </Container>
         </Container>
@@ -91,7 +134,7 @@ function CardsForm({ cards, selectedPosition, onPositionChange, onSubmit }) {
         if (i < cards.length) {
             items.push(
                 <Col xs="auto" key={`card-${cards[i].id}`} className="game-card-item d-flex flex-column align-items-center justify-content-center px-1">
-                    <GameCard card={cards[i]} showMisfortune={true} />
+                    <GameCard card={cards[i]}/>
                 </Col>
             );
         }
@@ -106,29 +149,12 @@ function CardsForm({ cards, selectedPosition, onPositionChange, onSubmit }) {
                         {items}
                     </Container>
                     <Container fluid className="text-center mt-5">
-                        <Button type="submit" variant="primary">Inserisci carta</Button>
+                        <Button type="submit" variant="primary" disabled={selectedPosition === null || (selectedPosition < 0 || selectedPosition >= cards.length)}>Inserisci carta</Button>
                     </Container>
                 </Form>
             </Container>
         </Container>
     );
 }
-
-// function CardsInHand(props) {
-//     return (
-//         <Row className="justify-content-center">
-//             <Col xs={12}>
-//                 <p className="text-secondary fw-semibold mb-2 text-center fs-5" style={{ letterSpacing: '1px' }}>Le tue carte:</p>
-//                 <Row className="justify-content-center g-3">
-//                     {props.cards.map(card => (
-//                         <Col key={card.id} className="game-card-col d-flex">
-//                             <GameCard card={card} showMisfortune={true} />
-//                         </Col>
-//                     ))}
-//                 </Row>
-//             </Col>
-//         </Row>
-//     );
-// }
 
 export default GamePage;
