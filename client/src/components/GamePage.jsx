@@ -2,37 +2,33 @@ import { Row, Col, Button, Container, Form } from 'react-bootstrap';
 import { Card, Game, User, Round } from '../models.mjs';
 import { useState, useEffect } from 'react';
 import CardsDisplay from './CardsDisplay.jsx';
-import dayjs from 'dayjs';
 import GameCard from './GameCard';
+import API from '../API.mjs';
 
-const user = new User("TestUser", "testuser@gmail.com", 1);
-const fakeGame = new Game(user.id, new dayjs().format("YYYY-MM-DD"), null, 1);
-fakeGame.cards = [
-    new Card("Ti si rompe la penna proprio durante l’esame.", '/images/cards/broken-pen.jpg', 1.0, 1),
-    new Card("Un compagno di corso copia tutto e prende 30 e lode.", '/images/cards/copied-and-passed.png', 2.5, 2),
-    new Card("Il caffè della macchinetta è freddo e amaro.", '/images/cards/bad-coffee.png', 2.0, 3),
-    new Card("Ti si rompe la penna proprio durante l’esame.", '/images/cards/broken-pen.jpg', 1.0, 4),
-    new Card("Un compagno di corso copia tutto e prende 30 e lode.", '/images/cards/copied-and-passed.png', 2.5, 5),
-].sort((a, b) => a.misfortune - b.misfortune);
-fakeGame.errors = 0;
-
-const roundZero = new Round(fakeGame.id, 0, null);
-roundZero.cards = fakeGame.cards;
-
-function GamePage() {
-    const [game, setGame] = useState(fakeGame);
-    const [currentRound, setCurrentRound] = useState(roundZero);
+function GamePage(props) {
+    const [currentRound, setCurrentRound] = useState(null);
     const [selectedPosition, setSelectedPosition] = useState(null);
+    const [errors, setErrors] = useState(0);
     
     // Round 1 Starts
-    useEffect(() => {
-        const roundCard = new Card("Vai a lezione… ma l’aula è cambiata e non lo sapevi.", '/images/cards/empty-class.png', null, 6);
-        setCurrentRound((oldRound) => ({
-            ...oldRound,
-            number: oldRound.number + 1,
-            cards: [roundCard]
-        }));
-    }, []);
+    // useEffect(() => {
+    //     const fetchFirstRound = async () => {
+    //         try {
+    //             const roundCards = await API.getRandomCardsForGame(props.game.id, 1, false);
+    //             if (roundCards.length === 0) {
+    //                 console.error("No cards received");
+    //                 return;
+    //             }
+                
+    //             const newRound = await API.createRound(new Round(props.game.id, roundCards));
+    //             setCurrentRound(newRound);
+    //         } catch (error) {
+    //             console.error(error);
+    //         }
+    //     };
+
+    //     fetchFirstRound();
+    // }, []);
 
     const handlePositionChange = (pos) => setSelectedPosition(pos);
 
@@ -41,19 +37,33 @@ function GamePage() {
         alert(`Carta inserita in posizione ${selectedPosition}`);
     };
 
-    const handleStartGame = () => {
-        alert("Inizio del gioco!");
+    const handleStartGame = async () => {
+        try {
+            const roundCard = await API.getRandomCardsForGame(props.game.id, 1, false);
+            const newRound = await API.createRound(new Round(props.game.id, [roundCard]));
+            setCurrentRound(newRound);
+            props.setGame((oldGame) => {
+                const newGame = {
+                    ...oldGame,
+                    cards: oldGame.cards.push(roundCard).sort((a, b) => a.misfortune - b.misfortune),
+                }
+                return newGame;
+            });
+        } 
+        catch (error) {
+        console.error(error);
+        }
     }
 
     return (
-        currentRound.number === 0 ?
+        currentRound === null ?
         <StartGameLayout
-            game={game}
+            game={props.game}
             handleStartGame={handleStartGame}
         />
         :
         <InGameLayout
-            game={game}
+            game={props.game}
             currentRound={currentRound}
             selectedPosition={selectedPosition}
             handlePositionChange={handlePositionChange}
@@ -76,7 +86,7 @@ function StartGameLayout(props) {
               <CardsDisplay cards={props.game.cards} />
               
               <Container className="text-center mt-5">
-                <Button variant="primary" size="lg" onClick={props.handleStartGame} className="px-5 py-3 fs-3"> Inizia a Giocare </Button>
+                <Button variant="primary" size="lg" onClick={props.handleStartGame} className="px-5 py-3 fs-3"> Gioca </Button>
               </Container>
         </Container>
     );
@@ -103,7 +113,7 @@ function RoundCardAndInfo(props) {
         <Row className="align-items-start w-100 m-0">
             <Col xs={0} md={3} lg={4}></Col>
                 <Col xs={12} md={6} lg={4} className="d-flex flex-column align-items-center">
-                    <p className="text-center text-secondary fw-semibold mb-2 fs-5" style={{ letterSpacing: '1px' }}>Nuova carta:</p>
+                    <p className="text-center text-secondary fw-semibold mb-2" style={{ letterSpacing: '1px' }}>Nuova carta:</p>
                     <GameCard card={props.roundCard}/>
                 </Col>
             <Col xs={12} md={3} lg={4} className="text-end text-break">
@@ -142,7 +152,7 @@ function CardsForm({ cards, selectedPosition, onPositionChange, onSubmit }) {
 
     return (
         <Container fluid className="d-flex flex-column align-items-center">
-            <p className="text-center text-secondary fw-semibold mb-2 fs-5" style={{ letterSpacing: '1px' }}>Le tue carte:</p>
+            <p className="text-center text-secondary fw-semibold mb-2" style={{ letterSpacing: '1px' }}>Le tue carte:</p>
             <Container fluid className="d-flex justify-content-center w-100" style={{ overflowX: 'auto' }}>
                 <Form onSubmit={onSubmit} className="m-0 p-0">
                     <Container fluid className="d-flex flex-nowrap">

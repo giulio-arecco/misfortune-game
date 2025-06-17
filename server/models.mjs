@@ -7,7 +7,7 @@ function Card(name, imagePath, misfortune, id = null) {
     this.misfortune = misfortune;
 }
 
-function Game(userId, date, cards = [], result = null, id = null) {
+function Game(userId, date = null, cards = [], result = null, id = null) {
     this.id = id;
     this.userId = userId;
     this.date = dayjs(date).format('YYYY-MM-DD');

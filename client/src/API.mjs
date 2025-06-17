@@ -125,7 +125,7 @@ const getUserGames = async (userId) => {
   return response.json();
 };
 
-export default API = {
+const API = {
   createGame,
   getRandomCardsForGame,
   updateGameResult,
@@ -133,3 +133,4 @@ export default API = {
   updateRoundResult,
   getUserGames
 };
+export default API;

@@ -17,7 +17,7 @@ const addGame = (game) => {
             if (err) reject(err);
             else {
                 const selectSql = "SELECT * FROM Game WHERE id = ?";
-                db.get(selectSql, [game.id], (err, row) => {
+                db.get(selectSql, [this.lastID], (err, row) => {
                     if (err) reject(err);
                     else if (!row) reject({ status: 404, message: "Game not found." });
                     else resolve(new Game(row.userId, row.date, [], row.result, row.id));
@@ -108,7 +108,7 @@ const addRound = async (round) => {
                 (err, rows) => {
                     if (err) reject(err);
                     else if (!rows || rows.length === 0) reject({ status: 404, message: "No cards found for the round." });
-                    else resolve(rows.map(row => new Card(row.name, row.imagePath, row.misfortune, row.id)));
+                    else resolve(rows.map(row => new Card(row.name, row.imagePath, null, row.id)));
                 }
             );
         });

@@ -4,13 +4,16 @@ import HomePage from './HomePage'
 import DefaultLayout from './DefaultLayout'
 import PageNotFound from './PageNotFound'
 import GamePage from './GamePage'
+import { useState } from 'react'
 
 function App() {
+  const [game, setGame] = useState(null)
+
   return (
     <Routes>
         <Route element={<DefaultLayout/>}>
-          <Route path='/' element={<HomePage/>} />
-          <Route path='/game' element={<GamePage/>} />
+          <Route path='/' element={<HomePage setGame={setGame}/>} />
+          <Route path='/game' element={<GamePage game={game}/>} setGame={setGame}/>
           <Route path='*' element={<PageNotFound/>} />
         </Route>
     </Routes>

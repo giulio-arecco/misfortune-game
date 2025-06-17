@@ -35,9 +35,6 @@ app.use(cors(corsOptions));
 // POST /api/games
 app.post('/api/games', [
     body('userId').optional({ nullable: true }).custom(intOrNullValidator),
-    body('date').exists().bail().withMessage('Field "date" must exist')
-    .isString().withMessage('Field "date" must be a string').bail()
-    .notEmpty().withMessage('Field "date" must be a non-empty string'),
 ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -45,7 +42,8 @@ app.post('/api/games', [
     }
     
     try {
-      const response = await addGame(req.body);
+      const today = dayjs().format('YYYY-MM-DD');
+      const response = await addGame(req.body, today);
       res.status(201).json(response);
     }
     catch (err) {
