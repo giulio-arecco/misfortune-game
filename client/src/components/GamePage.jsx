@@ -97,6 +97,7 @@ function InGameLayout(props) {
                         // selectedPosition={props.selectedPosition} 
                         setIsCorrectPosition={props.setIsCorrectPosition}
                         onPositionChange={props.handlePositionChange}
+                        setErrors={props.setErrors}
                         setGame={props.setGame}
                     />
                 ) : (<CardsDisplay cards={props.game.cards} />)}
