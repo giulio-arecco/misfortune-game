@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 import dayjs from 'dayjs';
 import { query, param, body, validationResult } from 'express-validator';
-import { addGame, addRound, getLatestRoundForGame, listRandomCardsForGame, updateGameResult, updateRoundResult, listUserGamesWithRoundsAndCards } from './dao.mjs';
+import { addGame, addRound, getLatestRoundForGame, listRandomCardsForGame, updateGameResult, updateRoundResult, listUserGamesWithRoundsAndCards, getCard } from './dao.mjs';
 import { Round } from './models.mjs';
 
 // init express
@@ -42,8 +42,9 @@ app.post('/api/games', [
     }
     
     try {
-      const today = dayjs().format('YYYY-MM-DD');
-      const response = await addGame(req.body, today);
+      const gameData = req.body;
+      gameData.date = dayjs().format('YYYY-MM-DD');
+      const response = await addGame(gameData);
       res.status(201).json(response);
     }
     catch (err) {
@@ -159,6 +160,28 @@ app.patch('/api/rounds/:roundId', [
     catch (err) {
       if (err.status === 404) res.status(404).json({ error: err.message });
       else res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+//GET /api/cards/:cardId
+app.get('/api/cards/:cardId', [
+    param('cardId').exists().withMessage('Param "cardId" must exist').bail()
+    .isInt({ min: 1 }).withMessage('Param "cardId" must be a positive integer')
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    
+    try {
+      const response = await getCard(req.params.cardId);
+      if (!response) {
+          return res.status(404).json({ error: "Card not found." });
+      }
+      res.status(200).json(response);
+    }
+    catch (err) {
+      res.status(500).json({ error: "Internal server error" });
     }
 });
 

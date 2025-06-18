@@ -13,7 +13,7 @@ function App() {
     <Routes>
         <Route element={<DefaultLayout/>}>
           <Route path='/' element={<HomePage setGame={setGame}/>} />
-          <Route path='/game' element={<GamePage game={game}/>} setGame={setGame}/>
+          <Route path='/game' element={<GamePage game={game} setGame={setGame}/>}/>
           <Route path='*' element={<PageNotFound/>} />
         </Route>
     </Routes>

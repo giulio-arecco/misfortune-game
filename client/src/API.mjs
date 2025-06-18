@@ -125,12 +125,31 @@ const getUserGames = async (userId) => {
   return response.json();
 };
 
+const getCard = async (cardId) => {
+  const response = await fetch(`${SERVER_URL}/api/cards/${cardId}`);
+  
+  if (response.status === 404) {
+    throw new Error('Card not found');
+  } else if (!response.ok) {
+    const errDetails = await response.json();
+    if (response.status === 400 && errDetails.errors) {
+      // Handle express-validator errors
+      throw new Error(`Validation error: ${errDetails.errors[0].msg}`);
+    } else {
+        throw new Error(`${response.status}: ${errDetails.error || 'Cannot get card'}`);
+    }
+  }
+  
+  return response.json();
+};
+
 const API = {
   createGame,
   getRandomCardsForGame,
   updateGameResult,
   createRound,
   updateRoundResult,
-  getUserGames
+  getUserGames,
+  getCard
 };
 export default API;

@@ -211,6 +211,17 @@ const listUserGamesWithRoundsAndCards = (userId) => {
     });
 }
 
+const getCard = (cardId) => {
+    return new Promise((resolve, reject) => {
+        const sql = "SELECT * FROM Card WHERE id = ?";
+        db.get(sql, [cardId], (err, row) => {
+            if (err) reject(err);
+            else if (row) resolve(new Card(row.name, row.imagePath, row.misfortune, row.id));
+            else resolve(null)
+        });
+    });
+}
+
 const addCard = (card) => {
     return new Promise((resolve, reject) => {
         const sql = "INSERT INTO Card(name, imagePath, misfortune) VALUES(?, ?, ?)";
@@ -239,6 +250,7 @@ export {
     getLatestRoundForGame,
     updateRoundResult,
     listUserGamesWithRoundsAndCards,
+    getCard,
     addCard,
     addUser
 };
