@@ -108,7 +108,9 @@ const updateRoundResult = async (roundId, result) => {
 };
 
 const getUserGames = async (userId) => {
-  const response = await fetch(`${SERVER_URL}/api/users/${userId}/games`);
+  const response = await fetch(`${SERVER_URL}/api/users/${userId}/games`, {
+    credentials: 'include'
+  });
   
   if (response.status === 404) {
     return []; // No games found for this user
@@ -143,6 +145,46 @@ const getCard = async (cardId) => {
   return response.json();
 };
 
+const logIn = async (credentials) => {
+  const response = await fetch(SERVER_URL + '/api/sessions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(credentials),
+  });
+  if(response.ok) {
+    const user = await response.json();
+    return user;
+  }
+  else {
+    const errDetails = await response.text();
+    throw errDetails;
+  }
+};
+
+const getUserInfo = async () => {
+  const response = await fetch(SERVER_URL + '/api/sessions/current', {
+    credentials: 'include',
+  });
+  const user = await response.json();
+  if (response.ok) {
+    return user;
+  } else {
+    throw user;
+  }
+};
+
+const logOut = async() => {
+  const response = await fetch(SERVER_URL + '/api/sessions/current', {
+    method: 'DELETE',
+    credentials: 'include'
+  });
+  if (response.ok)
+    return null;
+}
+
 const API = {
   createGame,
   getRandomCardsForGame,
@@ -150,6 +192,9 @@ const API = {
   createRound,
   updateRoundResult,
   getUserGames,
-  getCard
+  getCard,
+  logIn,
+  getUserInfo,
+  logOut
 };
 export default API;

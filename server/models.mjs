@@ -25,10 +25,12 @@ function Round(gameId, cards = [], number = null, startTime = null, endTime = nu
     this.cards = cards;
 }
 
-function User(username, email, id = null) {
+function User(username, email, salt = null, password = null, id = null) {
     this.id = id;
     this.email = email;
     this.username = username;
+    this.salt = salt;
+    this.password = password;
 }
 
 export { Card, Game, Round, User };

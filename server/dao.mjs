@@ -1,5 +1,6 @@
 import sqlite from 'sqlite3';
 import { Card, Game, Round, User } from './models.mjs';
+import crypto from 'crypto';
 
 const db = new sqlite.Database('./database.db', (err) => {
     if (err) throw err;
@@ -234,13 +235,40 @@ const addCard = (card) => {
 
 const addUser = (user) => {
     return new Promise((resolve, reject) => {
-        const sql = "INSERT INTO User(username, email) VALUES(?, ?)";
-        db.run(sql, [user.username, user.email], function (err) {
+        const sql = "INSERT INTO User(username, email, salt, password) VALUES(?, ?, ?, ?)";
+        db.run(sql, [user.username, user.email, user.salt, user.password], function (err) {
             if (err) reject(err);
             else resolve({ message: "User added successfully.", id: this.lastID });
         });
     });
 }
+
+const getUser = (email, password) => {
+    return new Promise((resolve, reject) => { 
+        const sql = "SELECT * FROM User WHERE email = ?";
+        db.get(sql, [email], (err, row) => {
+            if (err) reject(err);
+            else if (!row) resolve(null);
+            else {
+                const user = {id: row.id, username: row.username, email: row.email};
+                crypto.scrypt(password, row.salt, 32, function(err, hashedPassword) {
+                    if (err) {
+                        reject(err);
+                    }
+
+                    if (!crypto.timingSafeEqual(Buffer.from(row.password, 'hex'), hashedPassword)) {
+                        resolve(false);
+                    }
+                    else {
+                        resolve(user);
+                    }
+                })
+            }
+        });
+    });
+}
+
+
 
 export {
     addGame,
@@ -252,5 +280,6 @@ export {
     listUserGamesWithRoundsAndCards,
     getCard,
     addCard,
-    addUser
+    addUser,
+    getUser
 };

@@ -34,15 +34,15 @@ const cards = [
     new Card("Ti assegnano un gruppo di lavoro dove nessuno collabora.", '/images/cards/inefficient-team.jpg', 46.0),
     new Card("Il tuo coinquilino fa festa la notte prima di un esame importante.", '/images/cards/roommate-is-partying-late.jpg', 48.0),
     new Card("La stampante dell’università si inceppa proprio prima di stampare la tesi.", '/images/cards/printer-out-of-order.jpg', 50.0),
-    new Card("La tua sveglia non suona e perdi la lezione importante.", '/images/cards/slept-in', 54.0),
+    new Card("La tua sveglia non suona e perdi la lezione importante.", '/images/cards/slept-in.jpg', 54.0),
     new Card("Il prof ha corretto male la tua prova, ti toglie punti a caso.", '/images/cards/wrong-corrections.jpg', 56.0),
     new Card("Scopri di aver consegnato il file sbagliato.", '/images/cards/wrong-file-submitted.jpg', 58.0),
     new Card("La connessione va a singhiozzo durante un esame online.", '/images/cards/poor-connection.jpg', 60.0),
     new Card("Il tuo progetto sparisce dal drive condiviso.", '/images/cards/project-missing-from-cloud.jpg', 62.0),
     new Card("Ti si rovescia il caffè sul laptop.", '/images/cards/spilled-coffee-on-laptop.jpg', 64.0),
-    new Card("Il progetto di gruppo viene sabotato da un errore del server.", '/images/cards/', 66.0),
-    new Card("Il professore cambia l’orario dell’esame all’ultimo minuto.", '/images/cards/', 68.0),
-    new Card("Ti ammali e devi saltare la settimana di lezione più importante.", '/images/cards/', 70.0),
+    new Card("Il progetto di gruppo viene sabotato da un errore del server.", '/images/cards/server-error.png', 66.0),
+    new Card("Il professore cambia l’orario dell’esame all’ultimo minuto.", '/images/cards/rescheduled.png', 68.0),
+    new Card("Ti ammali e devi saltare la settimana di lezione più importante.", '/images/cards/sick-in-bed.png', 70.0),
     new Card("Hai studiato tutto il programma… tranne l’unico argomento dell’esame.", '/images/cards/', 73.0),
     new Card("Ti dimentichi di iscriversi all’esame e lo perdi.", '/images/cards/', 75.0),
     new Card("La batteria del portatile si scarica proprio durante la presentazione.", '/images/cards/', 77.0),
@@ -63,7 +63,8 @@ async function main() {
     for (const card of cards) {
         await addCard(card);
     }
-    await addUser(new User("Test User", "testuser@mail.com"));
+    await addUser(new User("TestUser1", "testuser1@mail.com", "faf9a5b8ca0194931502dfdcaa5680e1", "81497c8b6cff3bbdb10ebeced52d1e799b2abae45662dd6f8cc92051f10d731d"));
+    await addUser(new User("TestUser2", "testuser2@mail.com", "65389171b3b5453addd74114bb66ef28", "90988c972ec55327707bb61895d017fdcda4a75804a6c9c269ffddfb9d63b867"));
     db.close();
 }
 
