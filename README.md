@@ -1,7 +1,5 @@
 ﻿# Misfortune Game
 
----
-
 ## Table of Contents
 
 1. [Project Overview](#project-overview)
@@ -38,8 +36,6 @@
 10. [Interface Screenshots](#interface-screenshots)
 11. [License](#license)
 
----
-
 ## Project Overview
 
 Misfortune Game is a full-stack web application designed around an order-estimation card game based on misfortune indexes. Players are presented with scenarios depicting misfortunes of varying degrees of severity. Each card is associated with a numerical misfortune index rating its negative impact.
@@ -47,8 +43,6 @@ Misfortune Game is a full-stack web application designed around an order-estimat
 The core gameplay loop requires the player to maintain an array of misfortune cards sorted in ascending order of their misfortune values. Upon game initialization, three starter cards with known misfortune values are granted and sorted. In each subsequent round, the player receives a newly drawn, unrevealed card showing solely an image and a descriptive text label. The numerical misfortune value remains concealed on the server to prevent inspection. The player is allotted 30 seconds to determine the relative rank of the target card within their current hand and submit the chosen insertion slot via an interactive form. 
 
 Successful placement updates the hand and advances the score toward the target win condition (6 cards for authenticated users; 4 cards for guest/demo users). Submitting an incorrect position or permitting the countdown timer to expire registers an error and discards the card. Reaching the error threshold (3 errors for authenticated users; 1 error for guest users) triggers a loss condition. The system records all played games, individual round timelines, and card outcomes in a relational SQLite store, allowing authenticated players to review historical match statistics.
-
----
 
 ## System Architecture
 
@@ -124,8 +118,6 @@ stateDiagram-v2
     InGameLayout --> EndGameLayout : Loss condition met (Errors == 3 or Demo == 1)
     EndGameLayout --> [*] : Navigate Home or Restart
 ```
-
----
 
 ## Database Architecture and Data Models
 
@@ -243,8 +235,6 @@ Persistent operations are defined in `dao.mjs`. All database operations are wrap
   ```
 - **Relational Reconstitution (`listUserGamesWithRoundsAndCards`):** Implements a two-pass mapping algorithm. A multi-table `JOIN` returns flat rows; the DAO parses these records using a `Map<gameId, Game>` data structure, progressively reconstituting nested `Round` arrays and child `Card` collections while preserving historical order.
 
----
-
 ## Backend Engineering and Security Architecture
 
 ### HTTP Server Configuration
@@ -298,8 +288,6 @@ To maintain game integrity, clients cannot access misfortune ratings prematurely
 1. **Concealed Draw:** When drawing a new card for an active round, the frontend requests `GET /api/games/:gameId/randomCards?n=1&getMisfortune=false`. The DAO strips the `misfortune` field, setting it to `null`.
 2. **Client-Side Blind State:** The client renders the target card (`GameCard.jsx`) displaying only its title and visual graphic.
 3. **Post-Decision Query:** The client only queries `GET /api/cards/:cardId` after the user selects an insertion slot and clicks the submission button. The frontend then verifies the insertion boundaries against the true misfortune value, records the round outcome, and synchronizes the result back to the server via `PATCH /api/rounds/:roundId`.
-
----
 
 ## RESTful API Specification
 
@@ -542,8 +530,6 @@ Retrieves the complete historical record of completed matches for the specified 
   ```
 - **Error Responses:** `401 Unauthorized`, `404 Not Found` (no games on record), `500 Internal Server Error`.
 
----
-
 ## Frontend Engineering and Client Architecture
 
 ### Single-Page Application Structure
@@ -674,8 +660,6 @@ Navigation rules are enforced at both the router and component levels:
 2. **Reverse Protected Login Route:** Authenticated users navigating to `/login` are automatically redirected to the root route `/`.
 3. **In-Flight Game Confinement:** During an active match, `App.jsx` sets `isPlaying = true`. `NavHeader` intercepts click events on navigation links (`e.preventDefault()`) and applies CSS classes to disable them, preventing users from abandoning active games and causing orphaned sessions.
 
----
-
 ## Client Application Routes
 
 The client defines routes via React Router v7 components inside `App.jsx`:
@@ -690,8 +674,6 @@ The client defines routes via React Router v7 components inside `App.jsx`:
   Renders `LoginForm`. Captures email and password inputs and submits them to the authentication session endpoint. Redirects authenticated users to the home route.
 - **Route `*` (Catch-all Fallback):**
   Renders `PageNotFound.jsx`. Catches unmatched URLs and displays a 404 error notification.
-
----
 
 ## Setup, Seeding, and Execution
 
@@ -744,8 +726,6 @@ The repository includes a pre-seeded SQLite database file (`database.db`). To re
    ```
 4. Open your browser and navigate to `http://localhost:5173`.
 
----
-
 ## Preconfigured Test Credentials
 
 The database seeding script initializes two local mock test accounts configured with encrypted passwords for evaluation:
@@ -754,8 +734,6 @@ The database seeding script initializes two local mock test accounts configured 
 |---|---|---|
 | `testuser1@mail.com` | `password` | Registered Player |
 | `testuser2@mail.com` | `password` | Registered Player |
-
----
 
 ## Interface Screenshots
 
@@ -766,8 +744,6 @@ The database seeding script initializes two local mock test accounts configured 
 ![Game Screenshot 2](./screenshots/screen2.png)
 
 *Figure 2: Match outcome view displaying final score and card collections.*
-
----
 
 ## License
 
